@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>基愛寶寶：理財與價值觀育成模擬器</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans TC"', 'sans-serif'],
+            rounded: ['Fredoka', '"Noto Sans TC"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html, body {
+      font-size: 18px;
+      background-color: #f0f9ff;
+      background-image: radial-gradient(#bae6fd 1.5px, transparent 1.5px);
+      background-size: 24px 24px;
+      color: #1e293b;
+      font-family: 'Noto Sans TC', sans-serif;
+      user-select: none;
+    }
+
+    .title-centered-25 {
+      font-size: 25px !important;
+      text-align: center;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-3d {
+      position: relative;
+      transition: all 0.1s ease;
+      box-shadow: 0 5px 0 var(--tw-shadow-color, #0369a1), 0 8px 12px -3px rgba(0, 0, 0, 0.2);
+    }
+    .btn-3d:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 var(--tw-shadow-color, #0369a1), 0 3px 5px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-3d-yellow { --tw-shadow-color: #d97706; background-color: #f59e0b; color: #ffffff; }
+    .btn-3d-yellow:hover { background-color: #fbbf24; }
+
+    .btn-3d-blue { --tw-shadow-color: #0369a1; background-color: #0284c7; color: #ffffff; }
+    .btn-3d-blue:hover { background-color: #38bdf8; }
+
+    .btn-3d-pink { --tw-shadow-color: #be185d; background-color: #ec4899; color: #ffffff; }
+    .btn-3d-pink:hover { background-color: #f472b6; }
+
+    .ui-card-glass {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border-radius: 1.75rem;
+      box-shadow: 0 10px 30px -5px rgba(2, 132, 199, 0.08);
+    }
+
+    @keyframes mascotFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-6px) rotate(2deg); }
+    }
+    .animate-mascot { animation: mascotFloat 3s ease-in-out infinite; }
+
+    @keyframes pulseScale {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    .animate-pulse-scale { animation: pulseScale 1.5s ease-in-out infinite; }
+
+    .tab-btn.active {
+      background-color: #0284c7;
+      color: #ffffff;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+    }
+
+    .rainbow-circle-container {
+      position: relative;
+      width: 680px;
+      height: 680px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .center-baby-card {
+      position: absolute;
+      width: 270px;
+      z-index: 5;
+    }
+
+    .rainbow-node {
+      position: absolute;
+      width: 96px;
+      height: 80px;
+      margin: -40px -48px;
+      border-radius: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      z-index: 10;
+    }
+    .rainbow-node:hover {
+      transform: scale(1.2);
+      z-index: 20;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .c-1  { background-color: #fee2e2; color: #991b1b; } 
+    .c-2  { background-color: #ffedd5; color: #9a3412; } 
+    .c-3  { background-color: #fef3c7; color: #92400e; } 
+    .c-4  { background-color: #ecfccb; color: #3f6212; } 
+    .c-5  { background-color: #dcfce7; color: #166534; } 
+    .c-6  { background-color: #d1fae5; color: #065f46; } 
+    .c-7  { background-color: #e0f2fe; color: #075985; } 
+    .c-8  { background-color: #dbeafe; color: #1e40af; } 
+    .c-9  { background-color: #e0e7ff; color: #3730a3; } 
+    .c-10 { background-color: #f3e8ff; color: #6b21a8; } 
+    .c-11 { background-color: #fae8ff; color: #86198f; } 
+    .c-12 { background-color: #ffe4e6; color: #9f1239; } 
+
+    .popup-bar-30 {
+      font-size: 24px !important;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-12">
+
+  <!-- 全域消費/提示 Pop-up Bar 警告視窗 -->
+  <div id="actionPopupBar" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-4xl bg-slate-900/95 text-white p-6 rounded-3xl shadow-2xl backdrop-blur-lg hidden transition-all duration-300 popup-bar-30 text-center font-black border-2 border-amber-400">
+    <div id="popupBarContent" class="flex flex-col items-center justify-center gap-2"></div>
+  </div>
+
+  <!-- 價值觀變動/說明彈出視窗 Modal -->
+  <div id="valueNoticeModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center hidden">
+    <div class="ui-card-glass p-6 max-w-md w-[90%] text-center relative shadow-2xl border-4 border-sky-400">
+      <div id="valueNoticeIcon" class="text-7xl mb-2 animate-bounce">✨</div>
+      <h3 id="valueNoticeTitle" class="text-2xl font-black text-sky-600 mb-2">價值觀變動</h3>
+      <div class="bg-sky-50 p-4 rounded-2xl mb-4 text-left border border-sky-200">
+        <p id="valueNoticeDesc" class="text-base font-black text-slate-800 leading-relaxed"></p>
+      </div>
+      <button onclick="closeValueNoticeModal()" class="w-full py-3.5 btn-3d btn-3d-blue font-black text-base rounded-2xl">
+        明白！繼續體驗 👍
+      </button>
+    </div>
+  </div>
+
+  <!-- 第 3 個月突發事件 Modal (生病睇醫生) -->
+  <div id="eventSickModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center hidden">
+    <div class="ui-card-glass p-6 max-w-md w-[90%] text-center relative shadow-2xl border-4 border-rose-500">
+      <div class="text-7xl mb-2 animate-pulse">🤒🏥</div>
+      <span class="bg-rose-100 text-rose-800 text-xs px-3 py-1 rounded-full font-black">第 3 個月突發事件</span>
+      <h3 class="text-2xl font-black text-rose-600 my-2">你生病了！需要看醫生</h3>
+      <div class="bg-rose-50 p-4 rounded-2xl mb-4 text-left border border-rose-200">
+        <p class="text-base font-black text-rose-900 mb-2">
+          ⚠ 必要的醫療開支：<span class="text-2xl text-rose-600 font-rounded">HK$ 200</span>
+        </p>
+        <p class="text-sm font-bold text-slate-700 leading-relaxed">
+          突發生病屬於非預期的緊急需要！必須立即花費 $200 診金看醫生。這正是平常儲蓄應急預備金的重要性！
+        </p>
+      </div>
+      <button onclick="payDoctorFee()" class="w-full py-3.5 btn-3d btn-3d-pink font-black text-base rounded-2xl">
+        支付 $200 診金看醫生 💊
+      </button>
+    </div>
+  </div>
+
+  <!-- 頂部 Header -->
+  <header class="bg-white/80 backdrop-blur-md border-b border-sky-100 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 h-24 flex items-center justify-between">
+      <div class="flex items-center gap-3 w-full justify-between">
+        <div class="w-14 h-14 rounded-2xl bg-amber-400 flex items-center justify-center text-3xl shadow-sm cursor-pointer animate-mascot shrink-0" onclick="mascotSpeak('記住「先需要，後想要」，做個智慧理財小達人！👍')">
+          👩🏻‍🏫
+        </div>
+        <div class="flex-1 text-center">
+          <h1 class="title-centered-25 font-black text-sky-600 flex items-center gap-2 font-rounded">
+            基愛寶寶：理財與價值觀育成模擬器
+          </h1>
+          <p class="text-sm text-slate-500 font-bold">Budgeting Whiz — $500 自由理財與 12 價值觀彩虹圈</p>
+        </div>
+        <div class="flex items-center gap-4 shrink-0">
+          <div class="bg-sky-50 px-4 py-1.5 rounded-2xl font-bold text-sky-700 flex items-center gap-2">
+            <i class="fa-solid fa-calendar-star text-amber-500 text-xl"></i>
+            <span>第 <span id="headerMonth" class="text-xl font-black text-amber-500">1</span> 個月</span>
+          </div>
+
+          <div class="flex bg-slate-100 p-1 rounded-2xl">
+            <button id="viewSimBtn" onclick="switchMainView('simulation')" class="tab-btn active px-4 py-1.5 rounded-xl text-sm font-black transition-all">
+              🎮 理財體驗
+            </button>
+            <button id="viewReviewBtn" onclick="switchMainView('review')" class="tab-btn px-4 py-1.5 rounded-xl text-sm font-black text-slate-600 transition-all">
+              📖 理財記帳簿
+            </button>
+          </div>
+
+          <button onclick="resetGame()" class="text-sm px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold rounded-xl transition-all">
+            <i class="fa-solid fa-rotate-right"></i> 重置
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 「停一停，想一想」雙選項 Pop-up Modal -->
+  <div id="thinkModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="ui-card-glass p-6 max-w-md w-[90%] text-center relative shadow-2xl">
+      <div class="text-6xl mb-2 animate-bounce">👩🏻‍🏫🤔</div>
+      <h3 class="text-2xl font-black text-pink-600 mb-2">停一停，想一想！</h3>
+      <p class="text-base text-slate-800 mb-4 bg-pink-50/80 p-4 rounded-2xl font-black leading-relaxed">
+        杜老師提醒你：你還有未買齊的<span class="text-pink-600">「生活需要」</span>呀！<br>
+        <span class="text-xs text-rose-600 font-bold block mt-2">⚠ 錯誤決定警告：若無視需要而堅持購買「想要」，基愛寶寶的壓力會大幅飆升！</span>
+      </p>
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="cancelWantAndSwitchNeeds()" class="py-3 btn-3d btn-3d-blue font-black text-sm rounded-xl">
+          💡 先買需要
+        </button>
+        <button onclick="confirmForceBuyWant()" class="py-3 bg-slate-200 hover:bg-rose-100 text-slate-600 hover:text-rose-600 font-black text-sm rounded-xl transition-all">
+          🛒 堅持購買
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 壓力過 50 警告 Pop-up Modal -->
+  <div id="stressWarningModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center hidden">
+    <div class="ui-card-glass p-6 max-w-md w-[90%] text-center relative shadow-2xl border-4 border-rose-400">
+      <div class="text-7xl mb-2 animate-pulse">😰</div>
+      <h3 class="text-2xl font-black text-rose-600 mb-2">壓力過高警告！</h3>
+      <div class="bg-rose-50 p-4 rounded-2xl mb-4 text-left border border-rose-200">
+        <p class="text-base font-black text-rose-900 mb-2">
+          基愛寶寶目前壓力已超過 <span class="text-2xl font-black text-rose-600 font-rounded">50</span> 點！
+        </p>
+        <p class="text-sm font-bold text-slate-700 leading-relaxed">
+          請仔細留意你的每一個決定！因為優先購買「享樂想要」而忽視基本「生活需要」，會讓寶寶壓力大增！請盡快買齊必要的生活用品，紓緩壓力！
+        </p>
+      </div>
+      <button onclick="closeStressWarningModal()" class="w-full py-3.5 btn-3d btn-3d-yellow font-black text-base rounded-2xl">
+        知道了，我會謹慎選擇！💪
+      </button>
+    </div>
+  </div>
+
+  <!-- 月度結算評級 Modal -->
+  <div id="settlementModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center hidden">
+    <div class="ui-card-glass p-6 max-w-lg w-[90%] text-center relative shadow-2xl">
+      <div id="settlementEmoji" class="text-7xl mb-2">⭐</div>
+      <div id="settlementStars" class="text-3xl font-black text-amber-500 mb-2 font-rounded"></div>
+      <h2 id="settlementTitle" class="text-2xl font-black text-slate-800 mb-3">月度結算報告</h2>
+      <div class="bg-amber-50/60 p-4 rounded-2xl text-left mb-4 space-y-2">
+        <p id="settlementGuide" class="text-base font-black text-slate-800 leading-relaxed"></p>
+        <p id="settlementValueCore" class="text-sm text-sky-800 bg-sky-50/80 p-3 rounded-xl font-bold"></p>
+        <p id="settlementMascot" class="text-sm text-amber-900 bg-amber-100/80 p-3 rounded-xl font-extrabold"></p>
+      </div>
+      <button onclick="confirmNextMonth()" class="w-full py-3.5 btn-3d btn-3d-yellow font-black text-lg rounded-2xl">
+        進入下一個月 🚀
+      </button>
+    </div>
+  </div>
+
+  <!-- 主要內容區 -->
+  <main class="max-w-7xl mx-auto px-4 pt-6">
+
+    <div id="simulationView" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- 【左欄：零用錢看板 & 儲蓄】 -->
+      <section class="lg:col-span-3 space-y-6">
+        <div class="ui-card-glass p-6 bg-gradient-to-br from-sky-500 to-sky-600 text-white shadow-xl relative overflow-hidden">
+          <div class="absolute -right-4 -bottom-4 opacity-20 text-9xl">👛</div>
+          <div class="flex justify-between items-center mb-4">
+            <span class="bg-sky-700/60 text-sky-100 text-xs px-3 py-1 rounded-full font-bold">零用錢總覽</span>
+            <span class="text-amber-300 font-black text-xs">每月定額：$500</span>
+          </div>
+
+          <div class="grid grid-cols-1 gap-3 mb-4">
+            <div class="bg-white/15 backdrop-blur-md p-3.5 rounded-2xl border-b border-white/20">
+              <p class="text-sm text-sky-100 font-bold mb-0.5">👛 可用現金</p>
+              <p class="text-3xl font-black text-amber-300 font-rounded">HK$ <span id="balanceDisplay">500</span></p>
+            </div>
+            <div class="bg-white/15 backdrop-blur-md p-3.5 rounded-2xl border-b border-white/20">
+              <p class="text-sm text-sky-100 font-bold mb-0.5">🐷 豬仔儲蓄</p>
+              <p class="text-3xl font-black text-pink-300 font-rounded">HK$ <span id="piggyDisplay">0</span></p>
+            </div>
+          </div>
+
+          <div class="bg-sky-700/30 p-3.5 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between text-xs font-bold">
+              <span class="text-sky-100">儲蓄金額：</span>
+              <div class="flex gap-1.5">
+                <button id="btnAmt50" onclick="setDepositAmount(50)" class="px-3 py-1 rounded-lg bg-amber-400 text-slate-900 font-black hover:bg-amber-300 text-xs cursor-pointer transition-all">+$50</button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="handlePiggy('deposit')" class="py-2.5 btn-3d btn-3d-pink font-black text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer">
+                <i class="fa-solid fa-piggy-bank text-lg"></i> 存入
+              </button>
+              <button onclick="handlePiggy('withdraw')" class="py-2.5 bg-sky-800 hover:bg-sky-900 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition-all cursor-pointer">
+                <i class="fa-solid fa-arrow-up-from-bracket"></i> 取出
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ui-card-glass p-5">
+          <h2 class="text-base font-black text-slate-800 mb-1 flex items-center gap-2">
+            <i class="fa-solid fa-award text-amber-500 text-xl"></i> 月度理財評級
+          </h2>
+          <p class="text-xs text-slate-500 mb-3 font-medium">完成這個月的規劃後，點擊進行評級啦！</p>
+          <button onclick="processMonthlySettlement()" class="w-full py-3.5 btn-3d btn-3d-yellow font-black text-base rounded-2xl flex items-center justify-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-calculator text-lg"></i>
+            <span>進行月度結算評級</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 【中欄：基愛寶寶 + 12價值觀彩虹環】 -->
+      <section class="lg:col-span-6 space-y-4">
+        
+        <div class="ui-card-glass p-4 bg-gradient-to-r from-amber-50/80 via-white to-sky-50/80 flex items-center gap-3">
+          <div class="w-14 h-14 rounded-2xl bg-amber-400 flex items-center justify-center text-3xl shadow-sm shrink-0 animate-mascot cursor-pointer" onclick="triggerDynamicSpeech()">
+            👩🏻‍🏫
+          </div>
+          <div>
+            <span class="text-xs font-black text-amber-800 uppercase tracking-wider block">理財導師 杜老師說：</span>
+            <p id="mascotSpeech" class="text-base font-black text-slate-900 leading-snug">
+              「顧及需要，給你一個讚好！👍 記得要先滿足生活需要，再考慮儲蓄與享樂呀！」
+            </p>
+          </div>
+        </div>
+
+        <!-- 畫面 Central Area -->
+        <div class="ui-card-glass p-6 text-center overflow-hidden relative min-h-[720px] flex items-center justify-center">
+          
+          <div class="rainbow-circle-container">
+            
+            <!-- 中央：基愛寶寶卡片 -->
+            <div class="center-baby-card ui-card-glass p-5 bg-white/95 shadow-xl rounded-3xl">
+              <div class="flex flex-col items-center">
+                <div id="babyEmojiIcon" class="text-7xl mb-1 transition-all duration-300 drop-shadow-md hover:scale-105 cursor-pointer" onclick="triggerDynamicSpeech()">
+                  🐣
+                </div>
+                <h3 class="font-black text-slate-800 text-lg mb-1">基愛寶寶</h3>
+                <span id="babyMoodBadge" class="bg-emerald-100 text-emerald-800 text-xs px-3 py-0.5 rounded-full font-black mb-4">
+                  開心滿滿
+                </span>
+              </div>
+
+              <!-- 能力值區域 -->
+              <div class="space-y-3 text-left text-xs font-black">
+                <div class="pb-2 border-b border-sky-100">
+                  <div class="flex justify-between mb-1">
+                    <span class="text-slate-700 flex items-center gap-1"><span class="text-lg">😊</span> 心情</span>
+                    <span class="text-sky-600 font-rounded text-sm"><span id="happinessDisplay">80</span>/100</span>
+                  </div>
+                  <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div id="happinessBar" class="bg-emerald-400 h-full transition-all duration-500 rounded-full" style="width: 80%;"></div>
+                  </div>
+                </div>
+
+                <div class="pb-2 border-b border-sky-100">
+                  <div class="flex justify-between mb-1">
+                    <span class="text-slate-700 flex items-center gap-1"><span class="text-lg">😰</span> 壓力</span>
+                    <span id="stressValueText" class="text-rose-600 font-rounded text-sm"><span id="stressDisplay">0</span>/100</span>
+                  </div>
+                  <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div id="stressBar" class="bg-rose-400 h-full transition-all duration-500 rounded-full" style="width: 0%;"></div>
+                  </div>
+                </div>
+
+                <div class="pb-1">
+                  <div class="flex justify-between mb-1">
+                    <span class="text-slate-700 flex items-center gap-1"><span class="text-lg">💡</span> 理財觀</span>
+                    <span class="text-sky-600 font-rounded text-sm"><span id="financeConceptDisplay">80</span>/100</span>
+                  </div>
+                  <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div id="financeConceptBar" class="bg-sky-400 h-full transition-all duration-500 rounded-full" style="width: 80%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 外環 12 彩虹節點 -->
+            <div id="rainbowNodesContainer"></div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 【右欄：需要與想要】 -->
+      <section class="lg:col-span-3 space-y-6">
+        <div class="ui-card-glass p-5">
+          <div class="flex bg-slate-100 p-1 rounded-2xl mb-4">
+            <button onclick="switchTab('needs')" id="tabBtnNeeds" class="flex-1 py-2 rounded-xl text-xs font-black text-sky-600 bg-white shadow-sm flex items-center justify-center gap-1">
+              🍱 生活需要
+            </button>
+            <button onclick="switchTab('wants')" id="tabBtnWants" class="flex-1 py-2 rounded-xl text-xs font-bold text-slate-500 flex items-center justify-center gap-1">
+              🎮 個人想要
+            </button>
+          </div>
+
+          <div id="tabContentNeeds" class="space-y-3">
+            <p class="text-xs text-slate-500 font-bold">必須優先滿足的生活基本需求：</p>
+            <div id="needsContainer" class="space-y-2.5"></div>
+          </div>
+
+          <div id="tabContentWants" class="space-y-3 hidden">
+            <p class="text-xs text-slate-500 font-bold">滿足基本需求後的可選享樂項目：</p>
+            <div id="wantsContainer" class="space-y-2.5"></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- 頁面 2：理財記帳簿 -->
+    <div id="reviewView" class="hidden space-y-6">
+      <div class="ui-card-glass p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-black text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-book-bookmark text-sky-500 text-xl"></i> 理財與消費記帳簿
+          </h2>
+          <span id="reviewTxCount" class="text-xs font-bold bg-sky-100 text-sky-700 px-3 py-1 rounded-full">0 筆記錄</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-500 text-xs font-bold">
+                <th class="py-3 px-3">時間</th>
+                <th class="py-3 px-3">類別</th>
+                <th class="py-3 px-3">項目名稱</th>
+                <th class="py-3 px-3">金額變動</th>
+              </tr>
+            </thead>
+            <tbody id="reviewTableBody" class="divide-y divide-slate-100 text-xs font-medium">
+              <tr>
+                <td colspan="4" class="text-center py-8 text-slate-400">目前未有任何消費或儲蓄紀錄</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playPositiveSound() {
+      try {
+        const ctx = getAudioContext();
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, index) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.07);
+          gain.gain.setValueAtTime(0, ctx.currentTime + index * 0.07);
+          gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + index * 0.07 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + index * 0.07 + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + index * 0.07);
+          osc.stop(ctx.currentTime + index * 0.07 + 0.25);
+        });
+      } catch (e) {}
+    }
+
+    function playNegativeSound() {
+      try {
+        const ctx = getAudioContext();
+        const notes = [220.00, 164.81, 130.81];
+        notes.forEach((freq, index) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.12);
+          gain.gain.setValueAtTime(0, ctx.currentTime + index * 0.12);
+          gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + index * 0.12 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + index * 0.12 + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + index * 0.12);
+          osc.stop(ctx.currentTime + index * 0.12 + 0.35);
+        });
+      } catch (e) {}
+    }
+
+    const rainbowValuesConfig = [
+      { key: '堅毅', name: '堅毅', icon: '✊', class: 'c-1', desc: '堅持不懈，面對困難不輕易放棄。' },
+      { key: '尊重他人', name: '尊重他人', icon: '🤝', class: 'c-2', desc: '包容不同意見，禮貌對待每一個人。' },
+      { key: '責任感', name: '責任感', icon: '🎒', class: 'c-3', desc: '做好本分，對自己的選擇與行為負責。' },
+      { key: '國民身分認同', name: '國民身分認同', icon: '🇨🇳', class: 'c-4', desc: '關心社會發展，認同與愛護自己的家園。' },
+      { key: '承擔精神', name: '承擔精神', icon: '🛡️', class: 'c-5', desc: '勇於擔當責任，為團隊與家庭出力。' },
+      { key: '誠信', name: '誠信', icon: '💎', class: 'c-6', desc: '誠實守信，言行一致。' },
+      { key: '仁愛', name: '仁愛', icon: '❤️', class: 'c-7', desc: '關愛他人，樂於奉獻與分享。' },
+      { key: '守法', name: '守法', icon: '⚖️', class: 'c-8', desc: '遵守規則與法律，維護社會秩序。' },
+      { key: '同理心', name: '同理心', icon: '🌱', class: 'c-9', desc: '設身處地感受他人的需要的與心情。' },
+      { key: '勤勞', name: '勤勞', icon: '🐝', class: 'c-10', desc: '勤奮努力，用雙手創造價值。' },
+      { key: '團結', name: '團結', icon: '🧩', class: 'c-11', desc: '與他人互相合作，共同達成目標。' },
+      { key: '孝親', name: '孝親', icon: '🏡', class: 'c-12', desc: '孝順父母，關心家庭與長輩。' }
+    ];
+
+    const INITIAL_CASH = 500;
+    const initialStats = {
+      '堅毅': 15, '尊重他人': 15, '責任感': 15, '國民身分認同': 15, 
+      '承擔精神': 15, '誠信': 15, '仁愛': 15, '守法': 15, 
+      '同理心': 15, '勤勞': 15, '團結': 15, '孝親': 15
+    };
+
+    let appState = {
+      month: 1,
+      balance: INITIAL_CASH,
+      piggyBank: 0,
+      selectedAmount: 50,
+      activeTab: 'needs',
+      currentView: 'simulation',
+      
+      baby: {
+        happiness: 80,
+        stress: 0,
+        financeConcept: 80
+      },
+
+      boughtNeeds: { food: false, transport: false, study: false, family: false },
+      boughtWants: {},
+      hasSavedThisMonth: false,
+      firstActionWasSavings: false,
+      hasTakenActionThisMonth: false,
+      hasWarnedStressOver50: false,
+      hasTriggeredMonth3Event: false,
+      stats: { ...initialStats },
+      ledger: []
+    };
+
+    let pendingWantItemId = null;
+    let popupTimer = null;
+
+    // 所有項目（生活需要與個人想要）
+    const items = {
+      food: { id: 'food', type: 'need', name: '全月午餐飯券', price: 150, icon: '🍱', praise: '顧及需要，按時吃營養午餐！給你一個讚好！👍', impacts: { '責任感': 20, '勤勞': 10 }, statsChanges: { hap: +25, str: -15, fin: +10 } },
+      transport: { id: 'transport', type: 'need', name: '學生乘車月票', price: 50, icon: '🚌', praise: '顧及需要，遵守規則買月票！給你一個讚好！👍', impacts: { '守法': 20, '勤勞': 10 }, statsChanges: { hap: +25, str: -15, fin: +10 } },
+      study: { id: 'study', type: 'need', name: '補充練習工具書', price: 60, icon: '📚', praise: '顧及需要，主動投資學習！給你一個讚好！👍', impacts: { '堅毅': 25, '責任感': 10 }, statsChanges: { hap: +25, str: -15, fin: +15 } },
+      family: { id: 'family', type: 'need', name: '家庭基本醫藥箱', price: 80, icon: '💊', praise: '顧及需要與家人健康！給你一個讚好！👍', impacts: { '孝親': 25, '承擔精神': 15 }, statsChanges: { hap: +25, str: -15, fin: +10 } },
+      
+      game: { id: 'game', type: 'want', name: '熱門遊戲卡牌', price: 120, icon: '🎮', praise: '適度娛樂可以放鬆，記住唔好沉迷呀！', impacts: { '團結': 10 }, statsChanges: { hap: +10, str: 0, fin: -5 } },
+      museum: { id: 'museum', type: 'want', name: '博物館展覽門票', price: 40, icon: '🎫', praise: '參觀展覽開闊眼界，加深國民身分認同！', impacts: { '國民身分認同': 25 }, statsChanges: { hap: +10, str: -5, fin: +10 } },
+      charity: { id: 'charity', type: 'want', name: '賣旗慈善捐款', price: 20, icon: '🚩', praise: '樂於助人，充滿仁愛與同理心！', impacts: { '仁愛': 25, '同理心': 20 }, statsChanges: { hap: +10, str: -5, fin: +15 } }
+    };
+
+    window.onload = function() {
+      initRainbowCircleNodes();
+      renderItems();
+      setDepositAmount(50);
+      updateUI();
+    };
+
+    function initRainbowCircleNodes() {
+      const container = document.getElementById('rainbowNodesContainer');
+      container.innerHTML = '';
+      const total = rainbowValuesConfig.length;
+      const radius = 280; 
+
+      rainbowValuesConfig.forEach((item, index) => {
+        const angle = (index * (360 / total) - 90) * (Math.PI / 180);
+        const x = Math.round(radius * Math.cos(angle));
+        const y = Math.round(radius * Math.sin(angle));
+
+        const node = document.createElement('div');
+        node.className = `rainbow-node ${item.class}`;
+        node.style.left = `calc(50% + ${x}px)`;
+        node.style.top = `calc(50% + ${y}px)`;
+        node.id = `rainbow-node-${item.key}`;
+        node.onclick = () => showValueDetailModal(item.key);
+
+        node.innerHTML = `
+          <span class="text-2xl leading-none">${item.icon}</span>
+          <span class="text-[11px] font-black leading-tight mt-0.5 text-center px-1">${item.name}</span>
+          <span class="stars text-[10px] font-bold text-amber-600 font-rounded">★☆☆</span>
+        `;
+        container.appendChild(node);
+      });
+    }
+
+    function showValueDetailModal(key) {
+      const config = rainbowValuesConfig.find(c => c.key === key);
+      const val = appState.stats[key] || 0;
+      document.getElementById('valueNoticeIcon').innerText = config.icon;
+      document.getElementById('valueNoticeTitle').innerText = `${config.name} (得分: ${val})`;
+      document.getElementById('valueNoticeDesc').innerText = `${config.desc}\n\n透過精明理財與良善決定，提升你的「${config.name}」數值！`;
+      document.getElementById('valueNoticeModal').classList.remove('hidden');
+      playPositiveSound();
+    }
+
+    function triggerValueNoticeModal(title, desc, icon = "✨") {
+      document.getElementById('valueNoticeIcon').innerText = icon;
+      document.getElementById('valueNoticeTitle').innerText = title;
+      document.getElementById('valueNoticeDesc').innerText = desc;
+      document.getElementById('valueNoticeModal').classList.remove('hidden');
+    }
+
+    function closeValueNoticeModal() {
+      document.getElementById('valueNoticeModal').classList.add('hidden');
+    }
+
+    function triggerActionPopupBar(descText, changesText, isPositive = true) {
+      const popup = document.getElementById('actionPopupBar');
+      const content = document.getElementById('popupBarContent');
+
+      content.innerHTML = `
+        <div class="text-amber-300 font-extrabold drop-shadow">${descText}</div>
+        <div class="text-xl font-bold ${isPositive ? 'text-emerald-300' : 'text-rose-300'} font-rounded">${changesText}</div>
+      `;
+
+      popup.classList.remove('hidden');
+      if (isPositive) playPositiveSound();
+      else playNegativeSound();
+
+      if (popupTimer) clearTimeout(popupTimer);
+      popupTimer = setTimeout(() => {
+        popup.classList.add('hidden');
+      }, 4000);
+    }
+
+    function checkMonth3Event() {
+      if (appState.month === 3 && !appState.hasTriggeredMonth3Event) {
+        appState.hasTriggeredMonth3Event = true;
+        document.getElementById('eventSickModal').classList.remove('hidden');
+        playNegativeSound();
+      }
+    }
+
+    function payDoctorFee() {
+      const fee = 200;
+      if (appState.balance >= fee) {
+        appState.balance -= fee;
+      } else {
+        const remaining = fee - appState.balance;
+        appState.balance = 0;
+        appState.piggyBank = Math.max(0, appState.piggyBank - remaining);
+      }
+
+      appState.ledger.push({
+        month: appState.month,
+        type: '突發事件',
+        name: '🤒 突發生病睇醫生',
+        amount: -fee
+      });
+
+      document.getElementById('eventSickModal').classList.add('hidden');
+      triggerActionPopupBar("🏥 支付生病診金 HK$ 200！", "心情 -10 | 體驗應急儲蓄重要性", false);
+      appState.baby.happiness = Math.max(0, appState.baby.happiness - 10);
+      updateUI();
+    }
+
+    function triggerDynamicSpeech() {
+      const { happiness: hap, stress: str, financeConcept: fin } = appState.baby;
+      let speech = "";
+
+      if (str >= 60) {
+        speech = "😭 「未買齊生活必需品，我好擔心呀… 壓力好大，心情好差！」";
+      } else if (str >= 30) {
+        speech = "😰 「雖然有嘢買，但係仲未買齊重要嘢，好不安，心情好難好得起…」";
+      } else if (hap >= 80 && fin >= 80) {
+        speech = "🐣 「太好啦！有齊生活所需又存到錢，我好有安全感，心情超好！」";
+      } else if (hap >= 50) {
+        speech = "😊 「精明理財，先需要後想要，做個快樂理財小達人！」";
+      } else {
+        speech = "🤔 「記得好似杜老師話齋：要先滿足需要，再諗想要呀！」";
+      }
+
+      mascotSpeak(speech);
+    }
+
+    function updateUI() {
+      document.getElementById('balanceDisplay').innerText = appState.balance;
+      document.getElementById('piggyDisplay').innerText = appState.piggyBank;
+      document.getElementById('headerMonth').innerText = appState.month;
+
+      if (appState.baby.stress > 30) {
+        const stressPen = Math.floor((appState.baby.stress - 20) / 5);
+        appState.baby.happiness = Math.max(0, appState.baby.happiness - stressPen);
+      }
+
+      const hap = Math.min(100, Math.max(0, appState.baby.happiness));
+      const str = Math.min(100, Math.max(0, appState.baby.stress));
+      const fin = Math.min(100, Math.max(0, appState.baby.financeConcept));
+
+      appState.baby.happiness = hap;
+      appState.baby.stress = str;
+      appState.baby.financeConcept = fin;
+
+      document.getElementById('happinessDisplay').innerText = hap;
+      document.getElementById('happinessBar').style.width = hap + '%';
+
+      document.getElementById('stressDisplay').innerText = str;
+      document.getElementById('stressBar').style.width = str + '%';
+
+      document.getElementById('financeConceptDisplay').innerText = fin;
+      document.getElementById('financeConceptBar').style.width = fin + '%';
+
+      if (str >= 50 && !appState.hasWarnedStressOver50) {
+        appState.hasWarnedStressOver50 = true;
+        document.getElementById('stressWarningModal').classList.remove('hidden');
+        playNegativeSound();
+      }
+
+      const moodBadge = document.getElementById('babyMoodBadge');
+      const babyEmoji = document.getElementById('babyEmojiIcon');
+
+      if (str >= 60 || hap <= 30) {
+        babyEmoji.innerText = "😭"; 
+        moodBadge.className = "bg-rose-100 text-rose-800 text-xs px-3 py-0.5 rounded-full font-black mb-4";
+        moodBadge.innerText = "非常崩潰";
+      } else if (str >= 30 || hap <= 50) {
+        babyEmoji.innerText = "😰"; 
+        moodBadge.className = "bg-amber-100 text-amber-800 text-xs px-3 py-0.5 rounded-full font-black mb-4";
+        moodBadge.innerText = "感到焦慮";
+      } else {
+        babyEmoji.innerText = "🐣"; 
+        moodBadge.className = "bg-emerald-100 text-emerald-800 text-xs px-3 py-0.5 rounded-full font-black mb-4";
+        moodBadge.innerText = "開心滿滿";
+      }
+
+      rainbowValuesConfig.forEach(cfg => {
+        const val = appState.stats[cfg.key] || 0;
+        const node = document.getElementById(`rainbow-node-${cfg.key}`);
+        if (node) {
+          let stars = '★☆☆';
+          if (val >= 70) stars = '★★★';
+          else if (val >= 40) stars = '★★☆';
+          node.querySelector('.stars').innerText = stars;
+        }
+      });
+
+      checkMonth3Event();
+    }
+
+    function closeStressWarningModal() {
+      document.getElementById('stressWarningModal').classList.add('hidden');
+      mascotSpeak("「壓力過高啦！請優先滿足生活需要，留意每一個選擇！」");
+    }
+
+    function mascotSpeak(text) {
+      document.getElementById('mascotSpeech').innerText = text;
+    }
+
+    function switchMainView(view) {
+      appState.currentView = view;
+      const simView = document.getElementById('simulationView');
+      const revView = document.getElementById('reviewView');
+      const btnSim = document.getElementById('viewSimBtn');
+      const btnRev = document.getElementById('viewReviewBtn');
+
+      if (view === 'simulation') {
+        simView.classList.remove('hidden');
+        revView.classList.add('hidden');
+        btnSim.className = 'tab-btn active px-4 py-1.5 rounded-xl text-sm font-black transition-all';
+        btnRev.className = 'tab-btn px-4 py-1.5 rounded-xl text-sm font-black text-slate-600 transition-all';
+      } else {
+        simView.classList.add('hidden');
+        revView.classList.remove('hidden');
+        btnRev.className = 'tab-btn active px-4 py-1.5 rounded-xl text-sm font-black transition-all';
+        btnSim.className = 'tab-btn px-4 py-1.5 rounded-xl text-sm font-black text-slate-600 transition-all';
+        renderReviewTable();
+      }
+    }
+
+    function switchTab(tab) {
+      appState.activeTab = tab;
+      const btnNeeds = document.getElementById('tabBtnNeeds');
+      const btnWants = document.getElementById('tabBtnWants');
+      const contentNeeds = document.getElementById('tabContentNeeds');
+      const contentWants = document.getElementById('tabContentWants');
+
+      if (tab === 'needs') {
+        btnNeeds.className = "flex-1 py-2 rounded-xl text-xs font-black text-sky-600 bg-white shadow-sm flex items-center justify-center gap-1";
+        btnWants.className = "flex-1 py-2 rounded-xl text-xs font-bold text-slate-500 flex items-center justify-center gap-1";
+        contentNeeds.classList.remove('hidden');
+        contentWants.classList.add('hidden');
+      } else {
+        btnWants.className = "flex-1 py-2 rounded-xl text-xs font-black text-pink-600 bg-white shadow-sm flex items-center justify-center gap-1";
+        btnNeeds.className = "flex-1 py-2 rounded-xl text-xs font-bold text-slate-500 flex items-center justify-center gap-1";
+        contentWants.classList.remove('hidden');
+        contentNeeds.classList.add('hidden');
+      }
+    }
+
+    function setDepositAmount(amt) {
+      appState.selectedAmount = 50;
+    }
+
+    function handlePiggy(action) {
+      const amt = appState.selectedAmount;
+      if (action === 'deposit') {
+        if (appState.balance >= amt) {
+          appState.balance -= amt;
+          appState.piggyBank += amt;
+          if (!appState.hasTakenActionThisMonth) {
+            appState.firstActionWasSavings = true;
+          }
+          appState.hasTakenActionThisMonth = true;
+          appState.hasSavedThisMonth = true;
+          appState.baby.financeConcept = Math.min(100, appState.baby.financeConcept + 10);
+          
+          appState.stats['堅毅'] = (appState.stats['堅毅'] || 0) + 10;
+          appState.stats['責任感'] = (appState.stats['責任感'] || 0) + 10;
+
+          appState.ledger.push({
+            month: appState.month,
+            type: '儲蓄',
+            name: '🐷 存入豬仔儲蓄',
+            amount: -amt
+          });
+
+          triggerActionPopupBar(`🐷 成功存入 HK$ ${amt} 至儲蓄！`, "理財觀 +10 | 堅毅 +10 | 責任感 +10", true);
+          triggerValueNoticeModal("🌟 價值觀大幅提升！", `你養成儲蓄的好習慣！\n• 堅毅 +10\n• 責任感 +10\n理財觀大幅上升！`, "🐷");
+        } else {
+          triggerActionPopupBar("⚠ 現金不足，無法存入儲蓄！", "", false);
+        }
+      } else if (action === 'withdraw') {
+        if (appState.piggyBank >= amt) {
+          appState.piggyBank -= amt;
+          appState.balance += amt;
+
+          appState.ledger.push({
+            month: appState.month,
+            type: '取款',
+            name: '👛 從豬仔儲蓄提取現金',
+            amount: +amt
+          });
+
+          triggerActionPopupBar(`👛 成功提取 HK$ ${amt} 自由使用！`, "隨時靈活運用儲蓄", true);
+        } else {
+          triggerActionPopupBar("⚠ 儲蓄金額不足！", "", false);
+        }
+      }
+      updateUI();
+    }
+
+    function renderItems() {
+      const needsC = document.getElementById('needsContainer');
+      const wantsC = document.getElementById('wantsContainer');
+      needsC.innerHTML = '';
+      wantsC.innerHTML = '';
+
+      Object.values(items).forEach(item => {
+        const isBought = item.type === 'need' ? appState.boughtNeeds[item.id] : appState.boughtWants[item.id];
+        const card = document.createElement('div');
+        card.className = `p-3 rounded-2xl border transition-all flex items-center justify-between ${isBought ? 'bg-slate-100 border-slate-200 opacity-60' : 'bg-white border-sky-100 hover:shadow-md'}`;
+        
+        let impactBadges = '';
+        if (item.impacts) {
+          impactBadges = Object.entries(item.impacts).map(([k, v]) => 
+            `<span class="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.5 rounded-md font-bold mr-1">+${v} ${k}</span>`
+          ).join('');
+        }
+
+        card.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">${item.icon}</span>
+            <div>
+              <p class="font-black text-xs text-slate-800">${item.name}</p>
+              <p class="text-xs font-black text-sky-600 font-rounded">HK$ ${item.price}</p>
+              <div class="mt-1">${impactBadges}</div>
+            </div>
+          </div>
+          <button onclick="attemptBuyItem('${item.id}')" ${isBought ? 'disabled' : ''} class="px-3 py-1.5 rounded-xl font-black text-xs ${isBought ? 'bg-slate-300 text-slate-500' : (item.type === 'need' ? 'btn-3d btn-3d-blue' : 'btn-3d btn-3d-pink')} transition-all">
+            ${isBought ? '已購買' : '購買'}
+          </button>
+        `;
+
+        if (item.type === 'need') needsC.appendChild(card);
+        else wantsC.appendChild(card);
+      });
+    }
+
+    function attemptBuyItem(itemId) {
+      const item = items[itemId];
+      if (appState.balance < item.price) {
+        triggerActionPopupBar("⚠ 可用現金不足，請先提取儲蓄或調整支出！", "", false);
+        return;
+      }
+
+      if (item.type === 'want') {
+        const hasUnboughtNeeds = Object.values(appState.boughtNeeds).some(v => v === false);
+        if (hasUnboughtNeeds) {
+          pendingWantItemId = itemId;
+          document.getElementById('thinkModal').classList.remove('hidden');
+          playNegativeSound();
+          return;
+        }
+      }
+
+      executePurchase(item);
+    }
+
+    function cancelWantAndSwitchNeeds() {
+      document.getElementById('thinkModal').classList.add('hidden');
+      pendingWantItemId = null;
+      switchTab('needs');
+      mascotSpeak("「太棒了！聰明的選擇，先滿足生活需要是良好的理財習慣！」");
+    }
+
+    function confirmForceBuyWant() {
+      document.getElementById('thinkModal').classList.add('hidden');
+      if (pendingWantItemId) {
+        const item = items[pendingWantItemId];
+        executePurchase(item, true);
+        pendingWantItemId = null;
+      }
+    }
+
+    function executePurchase(item, isForceWant = false) {
+      appState.balance -= item.price;
+      appState.hasTakenActionThisMonth = true;
+
+      let valueChangesDesc = [];
+
+      if (item.type === 'need') {
+        appState.boughtNeeds[item.id] = true;
+        appState.baby.happiness += item.statsChanges.hap;
+        appState.baby.stress = Math.max(0, appState.baby.stress + item.statsChanges.str);
+        appState.baby.financeConcept += item.statsChanges.fin;
+      } else {
+        appState.boughtWants[item.id] = true;
+        if (isForceWant) {
+          appState.baby.stress += 35;
+          appState.baby.financeConcept = Math.max(0, appState.baby.financeConcept - 15);
+          triggerActionPopupBar(`⚠ 忽略生活需要，強制購買「${item.name}」！`, "壓力 +35 飆升 | 理財觀 -15", false);
+        } else {
+          appState.baby.happiness += item.statsChanges.hap;
+          appState.baby.stress = Math.max(0, appState.baby.stress + item.statsChanges.str);
+          appState.baby.financeConcept += item.statsChanges.fin;
+        }
+      }
+
+      if (item.impacts) {
+        Object.entries(item.impacts).forEach(([k, v]) => {
+          appState.stats[k] = (appState.stats[k] || 0) + v;
+          valueChangesDesc.push(`• ${k} +${v}`);
+        });
+      }
+
+      appState.ledger.push({
+        month: appState.month,
+        type: item.type === 'need' ? '生活需要' : '個人想要',
+        name: `${item.icon} ${item.name}`,
+        amount: -item.price
+      });
+
+      if (!isForceWant) {
+        triggerActionPopupBar(`🛒 成功購買「${item.name}」！`, item.praise, true);
+      }
+
+      if (valueChangesDesc.length > 0) {
+        triggerValueNoticeModal(
+          `✨ 價值觀提升：${item.name}`,
+          `購買「${item.name}」展現了你的優良品質：\n${valueChangesDesc.join('\n')}\n\n${item.praise}`,
+          item.icon
+        );
+      }
+
+      renderItems();
+      updateUI();
+    }
+
+    function processMonthlySettlement() {
+      const unboughtCount = Object.values(appState.boughtNeeds).filter(v => !v).length;
+      let stars = '⭐⭐⭐';
+      let title = '理財智多星！完美規劃！';
+      let guide = '你買齊了所有生活必需品，兼顧儲蓄與個人興趣，是優秀的理財小達人！';
+      let mascotMsg = '杜老師說：「表現太出色了！持之以恆，你的未來理財之路一定無往不利！」';
+
+      if (unboughtCount >= 2) {
+        stars = '⭐☆☆';
+        title = '需要未滿足，理財需改善！';
+        guide = '這個月還有多項生活必需品未買齊！請務必記住：先滿足「需要」，才考慮「想要」！';
+        mascotMsg = '杜老師說：「別忘記基本生活的保障呀！下個月加油，先買齊需要的項目！」';
+      } else if (unboughtCount === 1) {
+        stars = '⭐⭐☆';
+        title = '表現不錯，差一點就完美！';
+        guide = '大部份生活需要都已滿足，再稍微留意儲蓄與開支平衡就更棒了！';
+        mascotMsg = '杜老師說：「做得好！繼續保持，先需要後想要，下個月爭取三星滿分！」';
+      }
+
+      document.getElementById('settlementStars').innerText = stars;
+      document.getElementById('settlementTitle').innerText = title;
+      document.getElementById('settlementGuide').innerText = guide;
+      document.getElementById('settlementMascot').innerText = mascotMsg;
+      document.getElementById('settlementValueCore').innerText = `核心價值觀總覽：責任感(${appState.stats['責任感']}) | 堅毅(${appState.stats['堅毅']}) | 勤勞(${appState.stats['勤勞']})`;
+
+      document.getElementById('settlementModal').classList.remove('hidden');
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    }
+
+    function confirmNextMonth() {
+      document.getElementById('settlementModal').classList.add('hidden');
+      appState.month += 1;
+      appState.balance += INITIAL_CASH;
+      appState.boughtNeeds = { food: false, transport: false, study: false, family: false };
+      appState.boughtWants = {};
+      appState.hasSavedThisMonth = false;
+      appState.hasTakenActionThisMonth = false;
+      appState.hasWarnedStressOver50 = false;
+
+      appState.ledger.push({
+        month: appState.month,
+        type: '月度收入',
+        name: '💰 發放每月零用錢',
+        amount: +INITIAL_CASH
+      });
+
+      renderItems();
+      updateUI();
+      triggerActionPopupBar(`🚀 邁入第 ${appState.month} 個月！`, "已獲得新一季零用錢 HK$ 500", true);
+    }
+
+    function renderReviewTable() {
+      const tbody = document.getElementById('reviewTableBody');
+      document.getElementById('reviewTxCount').innerText = `${appState.ledger.length} 筆記錄`;
+
+      if (appState.ledger.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-400">目前未有任何消費或儲蓄紀錄</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = appState.ledger.slice().reverse().map(item => `
+        <tr class="hover:bg-sky-50/50 transition-all">
+          <td class="py-3 px-3 font-bold text-slate-600">第 ${item.month} 個月</td>
+          <td class="py-3 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-black ${item.amount > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'}">${item.type}</span></td>
+          <td class="py-3 px-3 font-black text-slate-800">${item.name}</td>
+          <td class="py-3 px-3 font-black font-rounded ${item.amount > 0 ? 'text-emerald-600' : 'text-rose-600'}">${item.amount > 0 ? '+' : ''}${item.amount}</td>
+        </tr>
+      `).join('');
+    }
+
+    function resetGame() {
+      if (confirm("確定要重新開始模擬體驗嗎？")) {
+        appState = {
+          month: 1,
+          balance: INITIAL_CASH,
+          piggyBank: 0,
+          selectedAmount: 50,
+          activeTab: 'needs',
+          currentView: 'simulation',
+          baby: { happiness: 80, stress: 0, financeConcept: 80 },
+          boughtNeeds: { food: false, transport: false, study: false, family: false },
+          boughtWants: {},
+          hasSavedThisMonth: false,
+          firstActionWasSavings: false,
+          hasTakenActionThisMonth: false,
+          hasWarnedStressOver50: false,
+          hasTriggeredMonth3Event: false,
+          stats: { ...initialStats },
+          ledger: []
+        };
+        renderItems();
+        updateUI();
+        switchMainView('simulation');
+      }
+    }
+  </script>
+</body>
+</html>
